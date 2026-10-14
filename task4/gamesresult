@@ -1,0 +1,93 @@
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+
+int main() {
+    /*
+    есть n игр, которые ведутся на поле 3 на 3
+    Не вникая в глубинную суть правил, происходит следующее:
+    1) мы хотим уметь обнолять доску (а именно изменить число)
+    2) мы хотим уметь завершать игру
+    3) мы хотим уметь находить статус(завершена или нет) и результат игры - (сумма чисел)
+
+    Результат конкретной игры должен храниться в памяти, как и доски
+    */
+
+    int n = 100;
+
+    int*** games;
+    games = new int **[n];
+    for (int id = 0; id < n; ++id) {
+        games[id] = new int*[3];
+        for (int i = 0; i < 3; ++i) {
+            games[id][i] = new int[3];
+            for (int j = 0; j < 3; ++j) {
+                games[id][i][j] = 0;
+            }
+        }
+    }
+
+    const int status_size = 13;
+    const int result_size = sizeof(int);
+    const int info_size = status_size + result_size;
+
+    void* info = ::operator new(info_size * n);
+    char* s = static_cast<char*>(info);
+    for (int id = 0; id < n; ++id) {
+        char* game_info = s + id * info_size;
+        std::strcpy(game_info, "not finished");
+        int zero_result = 0;
+        std::memcpy(game_info + status_size, &zero_result, sizeof(int));
+    }
+
+    char type[20];
+    std::cin >> std::setw(20) >> type;
+
+    while (std::strcmp(type, "quit") != 0) {
+        if (std::strcmp(type, "move") == 0) {
+            int id;
+            int x;
+            int y;
+            int k;
+            std::cin >> id >> x >> y >> k;
+            games[id][x][y] = k;
+        } else if (std::strcmp(type, "finish") == 0){
+            int id;
+            std::cin >> id;
+            char* game_info = s + id * info_size;
+            std::strcpy(game_info, "finished");
+            int result = 0;
+            for (int i = 0; i < 3; ++i) {
+                for (int j = 0; j < 3; ++j) {
+                    result += games[id][i][j];
+                }
+            }
+            std::memcpy(game_info + status_size, &result, sizeof(int));
+        } else if (std::strcmp(type, "result") == 0){
+            int id;
+            std::cin >> id;
+            char* gameInfo = s + id * info_size;
+            int result;
+            if (std::strcmp(gameInfo, "finished") != 0) {
+                std::cout << "The game is not yet finished.\n";
+            } else {
+                std::memcpy(&result, gameInfo + status_size, sizeof(int));
+                std::cout << "Result: " << result << '\n';
+            }
+        } else {
+            std::cout << "unknown command\n";
+        }
+        std::cin >> std::setw(20) >> type;
+    }
+
+    for (int id = 0; id < n; ++id) {
+        for (int i = 0; i < 3; ++i) {
+            delete[] games[id][i];
+        }
+        delete[] games[id];
+    }
+    delete[] games;
+    ::operator delete(info);
+
+    return 0;
+}
