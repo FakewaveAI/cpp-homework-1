@@ -1,6 +1,11 @@
 #include <iomanip>
 #include <iostream>
 
+struct pair {
+    int first;
+    int second;
+};
+
 double avg(const int* temps, const int N) {
     double sum = 0;
     for (int i = 0; i < N; ++i) {
@@ -9,7 +14,7 @@ double avg(const int* temps, const int N) {
     return sum / N;
 }
 
- std::pair<int, int> min_max(const int* temps, const int N) {
+pair min_max(const int* temps, const int N) {
     int mn = temps[0];
     int mx = temps[0];
     for (int i = 1; i < N; ++i) {
